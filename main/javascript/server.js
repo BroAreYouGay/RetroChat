@@ -40,7 +40,7 @@ server.on('connection', (socket) => {
                 if (friendName && friendName !== username && !friendsList.get(username).includes(friendName)) {
                     // Ajouter l'ami à la liste
                     friendsList.get(username).push(friendName);
-                    // Envoyer la nouvelle liste d'amis à l'utilisateur
+                    // Envoyer la nouvelle liste d'amis à l'util-isateur
                     sendFriendList(socket, username);
                     // Diffuser la liste des amis aux autres utilisateurs
                     broadcastFriendList();

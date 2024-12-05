@@ -2,43 +2,35 @@ const socket = new WebSocket('ws://localhost:9999');
 
 let username = '';  
 let selectedAvatar = 'assets/avatar-1.png';  
-let friends = [];  
 
-//quand la connexion WebSocket est ouverte
-socket.onopen = function() {
-    console.log('Connecté au serveur WebSocket');
-};
+// quand la connexion WebSocket est ouverte
+socket.onopen = () => console.log('connecté au serveur WebSocket');
 
 // fonction pour faire défiler le chat vers le bas
-function scrollToBottom() {
+const scrollToBottom = () => {
     const messagesDiv = document.getElementById('messages');
     messagesDiv.scrollTop = messagesDiv.scrollHeight;  
-}
+};
 
-// quand un message est reçu du serveur
-socket.onmessage = function(event) {
+// gestion des messages reçus du serveur
+socket.onmessage = event => {
     const data = event.data.split(':');  
 
-    if (data[0] === 'userList') {  
-        updateUserList(data[1]);  
-    } else if (data[0] === 'friendList') {  
-        const friendsData = data[1].split(';').map(friendData => {
-            const [avatar, username] = friendData.split(',');
+    if (data[0] === 'userList') {
+        updateUserList(data[1]);  // mise à jour des utilisateurs
+    } else if (data[0] === 'friendList') {
+        updateFriendsList(data[1].split(';').map(friend => {
+            const [avatar, username] = friend.split(',');
             return { avatar, username };
-        });
-        updateFriendsList(friendsData);  // mise à jour de la liste des amis
+        }));  // mise à jour des amis
     } else if (data.length >= 4) {  
-        const user = data[0];
-        const message = data[1];
-        const userAvatar = data[3];
-
+        const [user, message, , userAvatar] = data;
         const messageDiv = document.createElement('div');
         const avatarImg = document.createElement('img');
-        avatarImg.src = userAvatar && userAvatar.trim() !== '' ? userAvatar : 'assets/avatar-1.png';
-        avatarImg.classList.add('avatar');
         
-        avatarImg.style.width = '30px';
-        avatarImg.style.height = '30px';
+        avatarImg.src = userAvatar.trim() || 'assets/avatar-1.png';
+        avatarImg.classList.add('avatar');
+        avatarImg.style.width = avatarImg.style.height = '30px';
         avatarImg.style.borderRadius = '50%';
         
         messageDiv.textContent = `${user}: ${message}`;
@@ -47,26 +39,23 @@ socket.onmessage = function(event) {
         document.getElementById('messages').appendChild(messageDiv);
         scrollToBottom();
     } else {
-        console.error('Format de message incorrect:', event.data);
+        console.error('format de message incorrect:', event.data);
     }
 };
 
-// Fonction pour mettre à jour la liste des utilisateurs
-function updateUserList(userDataString) {
+// mettre à jour la liste des utilisateurs
+const updateUserList = (userDataString) => {
     const userListDiv = document.getElementById('user-list-container');
     userListDiv.innerHTML = '';  
 
-    const users = userDataString.split(';');  
-    users.forEach(userData => {
+    userDataString.split(';').forEach(userData => {
         const [avatar, user] = userData.split(',');
         const userDiv = document.createElement('div');
         
         const avatarImg = document.createElement('img');
         avatarImg.src = avatar;
         avatarImg.classList.add('avatar');
-        
-        avatarImg.style.width = '30px';
-        avatarImg.style.height = '30px';
+        avatarImg.style.width = avatarImg.style.height = '30px';
         avatarImg.style.borderRadius = '50%';
         
         userDiv.textContent = user;
@@ -74,10 +63,10 @@ function updateUserList(userDataString) {
 
         userListDiv.appendChild(userDiv);  
     });
-}
+};
 
-//fonction pour mettre à jour la liste des amis
-function updateFriendsList(friendsData) {
+// mettre à jour la liste des amis
+const updateFriendsList = (friendsData) => {
     const friendsListDiv = document.getElementById('friends-list-container');
     friendsListDiv.innerHTML = '';  
 
@@ -95,10 +84,10 @@ function updateFriendsList(friendsData) {
         friendDiv.appendChild(nameDiv);
         friendsListDiv.appendChild(friendDiv);
     });
-}
+};
 
 // formulaire de connexion
-document.getElementById('usernameForm').addEventListener('submit', function(event) {
+document.getElementById('usernameForm').addEventListener('submit', event => {
     event.preventDefault();
     username = document.getElementById('username').value;
     socket.send(`newUser:${username}:${selectedAvatar}`);
@@ -116,7 +105,7 @@ document.querySelectorAll('.avatar-option').forEach(avatar => {
 });
 
 // envoyer un message
-document.getElementById('formulaire').addEventListener('submit', function(event) {
+document.getElementById('formulaire').addEventListener('submit', event => {
     event.preventDefault();
     const message = document.getElementById('message').value;
     socket.send(`message:${message}:${selectedAvatar}`);
@@ -125,7 +114,7 @@ document.getElementById('formulaire').addEventListener('submit', function(event)
 });
 
 // ajouter un ami
-document.getElementById('add-friend-btn').addEventListener('click', function() {
+document.getElementById('add-friend-btn').addEventListener('click', () => {
     const friendName = document.getElementById('add-friend').value.trim();
     if (friendName) {
         socket.send(`addFriend:${friendName}`);

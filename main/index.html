@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>RetroChat</title>
     <meta charset="utf-8">
+    <title>RetroChat</title>
     <!-- lien vers le fichier CSS pour le style de la page -->
     <link rel="stylesheet" href="css/style.css">
-    <!-- lien vers la police "Press Start 2P" utilisée pour l'aspect rétro -->
+    <!-- police rétro utilisée -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -17,7 +17,7 @@
         <div id="messages"></div>
 
         <!-- formulaire pour entrer le pseudo et choisir un avatar -->
-        <form id="usernameForm" action="#" method="post">
+        <form id="usernameForm">
             <!-- champ pour entrer le pseudo -->
             <input type="text" id="username" placeholder="Entrez votre pseudo" required>
             
@@ -37,7 +37,7 @@
         </form>
 
         <!-- formulaire pour envoyer un message, caché au début -->
-        <form id="formulaire" style="display:none;" action="#" method="post">
+        <form id="formulaire" style="display:none;">
             <!-- champ pour entrer le message -->
             <input type="text" id="message" placeholder="Entrez votre message ici" required>
             <!-- bouton pour envoyer le message -->
@@ -45,13 +45,30 @@
         </form>
     </div>
 
-    <!-- section pour afficher la liste des utilisateurs connectés -->
+    <!-- liste des utilisateurs connectés -->
     <div id="user-list">
         <h3>Utilisateurs connectés</h3>
         <div id="user-list-container"></div>
     </div>
 
-    <!-- inclusion du fichier JavaScript qui gère la logique du chat -->
+    <!-- liste des amis -->
+    <div id="friends-list">
+        <h3>Mes amis</h3>
+        <div id="friends-list-container"></div>
+    </div>
+
+    <!-- formulaire pour ajouter un ami -->
+    <div id="add-friend">
+        <h3>Ajouter un ami</h3>
+        <form id="addFriendForm">
+            <!-- champ pour entrer le pseudo de l'ami -->
+            <input type="text" id="friend-username" placeholder="Entrez le pseudo de l'ami" required>
+            <!-- bouton pour envoyer la demande d'ami -->
+            <button type="submit">Ajouter l'ami</button>
+        </form>
+    </div>
+
+    <!-- inclusion du fichier JavaScript -->
     <script src="javascript/script.js"></script>
 </body>
 </html>

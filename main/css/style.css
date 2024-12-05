@@ -44,16 +44,15 @@ h1 {
     font-size: 0.9rem;  /* taille de police plus petite pour les messages */
 }
 
-/* style pour le formulaire de connexion et de message */
-#usernameForm,
-#formulaire {
+/* style pour les formulaires */
+#usernameForm, #formulaire, #add-friend form {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
 /* style pour les champs de texte et les boutons */
-input[type="text"], input[type="color"], button {
+input[type="text"], button {
     font-family: 'Press Start 2P', cursive;
     font-size: 1rem;
     padding: 10px;
@@ -84,7 +83,6 @@ button:hover {
     margin-top: 10px;
 }
 
-/* style pour les options d'avatar */
 .avatars {
     display: flex;
     gap: 10px;
@@ -106,35 +104,47 @@ button:hover {
     border: 2px solid #f4d03f;
 }
 
-/* style pour la liste des utilisateurs */
-#user-list {
-    width: 300px;
-    position: absolute;
-    top: 20px;
-    right: 20px;
+/* style pour les sections avec liste d'utilisateurs et d'amis */
+#user-list, #add-friend, #friend-requests, #friends-list {
+    position: fixed;
     background-color: #282828;  /* fond gris foncé */
     color: #f4d03f;  /* texte jaune */
     border: 2px solid #f4d03f;  /* bordure jaune */
     border-radius: 10px;
-    padding: 10px;
+    padding: 20px;
     box-shadow: 0 0 10px #f4d03f;  /* ombre jaune */
+    width: 250px;  /* largeur fixe */
+    z-index: 10;
 }
 
-/* style du titre dans la liste des utilisateurs */
-#user-list h3 {
+#user-list {
+    top: 20px;
+    right: 20px;
+}
+
+#add-friend {
+    top: 20px;
+    left: 20px;
+}
+
+#friend-requests {
+    top: 150px;  /* juste en dessous de "Ajouter un ami" */
+    left: 20px;
+}
+
+#friends-list {
+    top: 300px;  /* en dessous de "Demandes d'amis" */
+    left: 20px;
+}
+
+/* style pour les titres des sections */
+h3 {
     text-align: center;
     margin-bottom: 10px;
     font-size: 1.5rem;
 }
 
-/* style pour le conteneur de la liste des utilisateurs */
-#user-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* style pour chaque message */
+/* style pour les messages dans la zone des messages */
 .message {
     display: flex;
     align-items: center;
@@ -147,16 +157,43 @@ button:hover {
     margin-bottom: 5px;
 }
 
-/* style pour l'avatar du message */
 .message img {
     width: 30px;
     height: 30px;
     border-radius: 50%;
 }
 
-/* style pour les messages à l'intérieur du conteneur des messages */
 #messages div {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
+}
+
+/* style pour les champs dans la section "Ajouter un ami" */
+#add-friend input {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1rem;
+    padding: 10px;
+    border: 2px solid #f4d03f;
+    border-radius: 5px;
+    background-color: #1d1d1d;
+    color: #f4d03f;
+    outline: none;
+    text-align: center;
+}
+
+/* bouton "Ajouter un ami" */
+#add-friend button {
+    background-color: #f4d03f;
+    color: #1d1d1d;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    border-radius: 5px;
+}
+
+/* effet au survol du bouton "Ajouter un ami" */
+#add-friend button:hover {
+    transform: scale(1.05);
 }
