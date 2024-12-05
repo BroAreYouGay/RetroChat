@@ -1,85 +1,156 @@
-const WebSocket = require('ws');  // on importe la bibliothèque WebSocket
+const WebSocket = require('ws');
 
-// crée un serveur WebSocket qui écoute sur le port 9999
+// création du serveur websocket sur le port 9999
 const server = new WebSocket.Server({ port: 9999 });
 
-const clients = new Map();  // crée une Map pour stocker les utilisateurs connectés, avec leur socket
-const friendsList = new Map();  // Map pour stocker les amis de chaque utilisateur
+// dictionnaires pour stocker les informations des utilisateurs, amis et demandes en attente
+const clients = new Map();
+const friendsList = new Map();
+const pendingFriends = new Map();
 
-// lorsque un utilisateur se connecte au serveur
+// quand un utilisateur se connecte
 server.on('connection', (socket) => {
-    console.log('un utilisateur s\'est connecté.');  // affiche dans la console qu'un utilisateur s'est connecté
+    console.log('un utilisateur s\'est connecté.');
 
-    // écouter les messages envoyés par l'utilisateur
+    // quand un message est reçu
     socket.on('message', (message) => {
-        const [type, ...data] = message.toString().split(':');  // on divise le message en parties séparées par ":"
+        const [type, ...data] = message.toString().split(':'); // on découpe le message en type et données
 
-        if (type === 'newUser') {  // si le type du message est "newUser", c'est un nouvel utilisateur
-            const username = data[0];  // récupère le nom d'utilisateur
-            const avatar = data[1];  // récupère l'avatar de l'utilisateur
-            clients.set(socket, { username, avatar });  // on stocke l'utilisateur et son avatar
-            friendsList.set(username, []);  // initialiser la liste des amis de l'utilisateur
-
-            // diffuser la liste des utilisateurs connectés à tous les clients
+        // si un nouvel utilisateur se connecte
+        if (type === 'newUser') {
+            const username = data[0]; // nom d'utilisateur
+            const avatar = data[1];   // avatar de l'utilisateur
+            // on enregistre l'utilisateur et ses données
+            clients.set(socket, { username, avatar });
+            friendsList.set(username, []); // liste des amis de l'utilisateur
+            pendingFriends.set(username, []); // liste des demandes d'amis en attente
+            // on envoie la liste des utilisateurs à tous les clients
             broadcastUserList();
-        } else if (type === 'message') {  // sinon, c'est un message d'un utilisateur
-            const clientInfo = clients.get(socket);  // récupère les informations de l'utilisateur
-            if (clientInfo) {  // si l'utilisateur existe
-                const { username, avatar } = clientInfo;  // on extrait le nom d'utilisateur et l'avatar
+        }
 
-                // diffuser le message à tous les utilisateurs
+        // si un utilisateur envoie un message
+        else if (type === 'message') {
+            const clientInfo = clients.get(socket); // récupère les informations de l'utilisateur
+            if (clientInfo) {
+                const { username, avatar } = clientInfo;
+                // on diffuse le message à tous les autres utilisateurs
                 broadcastMessage(`${username}:${data.join(':')}:${avatar}`);
             }
-        } else if (type === 'addFriend') {  // si le message est de type "addFriend"
-            const clientInfo = clients.get(socket);  // récupère les informations de l'utilisateur
+        }
+
+        // si un utilisateur veut ajouter un ami
+        else if (type === 'addFriend') {
+            const clientInfo = clients.get(socket); // récupère les informations de l'utilisateur
             if (clientInfo) {
                 const { username } = clientInfo;
-                const friendName = data[0];  // nom de l'ami à ajouter
-                
-                // Si l'ami est valide et pas déjà dans la liste des amis
-                if (friendName && friendName !== username && !friendsList.get(username).includes(friendName)) {
-                    // Ajouter l'ami à la liste
-                    friendsList.get(username).push(friendName);
-                    // Envoyer la nouvelle liste d'amis à l'util-isateur
-                    sendFriendList(socket, username);
-                    // Diffuser la liste des amis aux autres utilisateurs
-                    broadcastFriendList();
+                const friendName = data[0]; // nom de l'ami
+                const friendSocket = Array.from(clients.entries()).find(([, value]) => value.username === friendName); // trouve le socket de l'ami
+
+                // si l'ami existe
+                if (friendSocket) {
+                    const [friendSocketInstance] = friendSocket;
+                    // ajoute la demande dans la liste des demandes en attente
+                    pendingFriends.get(friendName).push(username);
+                    // envoie la demande à l'ami
+                    friendSocketInstance.send(`friendRequest:${username}`);
+                    // envoie une confirmation au demandeur
+                    socket.send(`addFriendSuccess:${friendName}`);
+                } else {
+                    // erreur si l'ami n'existe pas
+                    socket.send(`addFriendError:${friendName} n'existe pas.`);
                 }
             }
         }
+
+        // si un utilisateur accepte la demande d'ami
+        else if (type === 'acceptFriend') {
+            const clientInfo = clients.get(socket); // récupère les informations de l'utilisateur
+            if (clientInfo) {
+                const { username } = clientInfo;
+                const friendName = data[0]; // nom de l'ami
+                const requests = pendingFriends.get(username); // demandes en attente
+
+                // si l'ami est dans la liste des demandes en attente
+                if (requests.includes(friendName)) {
+                    // ajout de l'ami dans les listes d'amis des deux utilisateurs
+                    friendsList.get(username).push(friendName);
+                    friendsList.get(friendName).push(username);
+
+                    // suppression de la demande de la liste des demandes en attente
+                    pendingFriends.set(username, requests.filter(req => req !== friendName));
+
+                    // envoi de la mise à jour de la liste des amis à l'ami
+                    const friendSocket = Array.from(clients.entries()).find(([, value]) => value.username === friendName);
+                    if (friendSocket) {
+                        const [friendSocketInstance] = friendSocket;
+                        sendFriendList(friendSocketInstance, friendName);
+                    }
+
+                    // envoi de la mise à jour de la liste des amis au demandeur
+                    sendFriendList(socket, username);
+                } else {
+                    // erreur si l'ami n'a pas demandé à être ami
+                    socket.send(`addFriendError:${friendName} n'a pas demandé à être ami.`);
+                }
+            }
+        }
+
+        // si un utilisateur rejette la demande d'ami
+        else if (type === 'rejectFriend') {
+            const clientInfo = clients.get(socket); // récupère les informations de l'utilisateur
+            if (clientInfo) {
+                const { username } = clientInfo;
+                const friendName = data[0]; // nom de l'ami
+                const requests = pendingFriends.get(username); // demandes en attente
+
+                // si l'ami est dans la liste des demandes en attente
+                if (requests.includes(friendName)) {
+                    // suppression de la demande rejetée
+                    pendingFriends.set(username, requests.filter(req => req !== friendName));
+
+                    // envoi de l'info au demandeur que la demande a été rejetée
+                    const friendSocket = Array.from(clients.entries()).find(([, value]) => value.username === friendName);
+                    if (friendSocket) {
+                        const [friendSocketInstance] = friendSocket;
+                        friendSocketInstance.send(`addFriendError:${username} a rejeté la demande.`);
+                    }
+                }
+            }
+        }
+
     });
 
-    // lorsque l'utilisateur se déconnecte
+    // quand une connexion est fermée
     socket.on('close', () => {
-        console.log('un utilisateur s\'est déconnecté.');  // on affiche que l'utilisateur s'est déconnecté
-        const clientInfo = clients.get(socket);
+        const clientInfo = clients.get(socket); // récupère les informations de l'utilisateur
         if (clientInfo) {
-            // Supprimer l'utilisateur de la liste des clients et des amis
             const { username } = clientInfo;
-            friendsList.delete(username);  // retirer l'utilisateur des amis
+            // supprime l'utilisateur des listes d'amis et de demandes
+            friendsList.delete(username);
+            pendingFriends.delete(username);
         }
-        clients.delete(socket);  // on retire l'utilisateur de la liste des clients
-        broadcastUserList();  // on met à jour la liste des utilisateurs pour tous les clients
+        // supprime l'utilisateur de la liste des clients
+        clients.delete(socket);
+        // met à jour la liste des utilisateurs connectés
+        broadcastUserList();
     });
 });
 
-// fonction pour diffuser un message à tous les clients connectés
+// fonction pour diffuser un message à tous les utilisateurs connectés
 function broadcastMessage(message) {
     server.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {  // vérifier si le client est connecté
-            client.send(message);  // envoyer le message au client
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
         }
     });
 }
 
 // fonction pour diffuser la liste des utilisateurs connectés
 function broadcastUserList() {
-    // on crée une liste d'utilisateurs avec leur avatar et nom
     const userList = Array.from(clients.values())
         .map(({ username, avatar }) => `${avatar},${username}`)
         .join(';');
 
-    // envoyer la liste des utilisateurs à tous les clients
     server.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(`userList:${userList}`);
@@ -87,28 +158,22 @@ function broadcastUserList() {
     });
 }
 
-// fonction pour envoyer la liste d'amis à un utilisateur
+// fonction pour envoyer la liste des amis d'un utilisateur
 function sendFriendList(socket, username) {
-    const friends = friendsList.get(username);
-    const friendListString = friends.join(';');  // convertit la liste des amis en chaîne de caractères
+    const friends = friendsList.get(username) || [];
+    const friendListString = friends
+        .map(friend => {
+            const friendInfo = Array.from(clients.values()).find(user => user.username === friend);
+            if (friendInfo) {
+                return `${friendInfo.avatar},${friend}`;
+            }
+            return null;
+        })
+        .filter(Boolean)
+        .join(';');
 
-    // envoyer la liste des amis au client
     socket.send(`friendList:${friendListString}`);
 }
 
-// fonction pour diffuser la liste des amis à tous les utilisateurs
-function broadcastFriendList() {
-    server.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            const clientInfo = clients.get(client);
-            if (clientInfo) {
-                const { username } = clientInfo;
-                const friends = friendsList.get(username);
-                const friendListString = friends.join(';');
-                client.send(`friendList:${friendListString}`);
-            }
-        }
-    });
-}
-
-console.log('serveur websocket en écoute sur ws://localhost:9999');  // afficher que le serveur est bien en marche
+// message indiquant que le serveur est en écoute
+console.log('serveur websocket en écoute sur ws://localhost:9999');
