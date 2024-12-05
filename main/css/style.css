@@ -1,0 +1,162 @@
+/* style général du body */
+body {
+    font-family: 'Press Start 2P', cursive;
+    background-color: #1d1d1d;  /* fond sombre */
+    color: #f4d03f;  /* texte jaune */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+/* style du titre principal */
+h1 {
+    font-size: 3rem;
+    text-align: center;
+    color: #f4d03f;
+    text-shadow: 2px 2px 8px #000000;  /* ombre portée sur le texte */
+    margin-bottom: 20px;
+}
+
+/* style général du chat */
+#chat {
+    width: 600px;
+    padding: 20px;
+    background-color: #282828;  /* fond gris foncé */
+    border: 4px solid #f4d03f;  /* bordure jaune */
+    border-radius: 10px;
+    box-shadow: 0 0 15px #f4d03f;  /* ombre jaune */
+}
+
+/* style pour la zone des messages */
+#messages {
+    height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: #1d1d1d;  /* fond sombre */
+    color: #f4d03f;  /* texte jaune */
+    border: 2px solid #f4d03f;  /* bordure jaune */
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;  /* taille de police plus petite pour les messages */
+}
+
+/* style pour le formulaire de connexion et de message */
+#usernameForm,
+#formulaire {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* style pour les champs de texte et les boutons */
+input[type="text"], input[type="color"], button {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1rem;
+    padding: 10px;
+    border: 2px solid #f4d03f;
+    border-radius: 5px;
+    background-color: #1d1d1d;  /* fond sombre */
+    color: #f4d03f;  /* texte jaune */
+    outline: none;
+    text-align: center;
+}
+
+/* style pour le bouton */
+button {
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+/* effet au survol du bouton */
+button:hover {
+    background-color: #f4d03f;
+    color: #1d1d1d;
+    transform: scale(1.05);
+}
+
+/* style pour la section de sélection d'avatars */
+#avatar-selection {
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* style pour les options d'avatar */
+.avatars {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.avatar-option {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.3s, border-color 0.3s;
+}
+
+/* effet au survol ou sélection de l'avatar */
+.avatar-option:hover,
+.avatar-option.selected {
+    transform: scale(1.2);
+    border: 2px solid #f4d03f;
+}
+
+/* style pour la liste des utilisateurs */
+#user-list {
+    width: 300px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #282828;  /* fond gris foncé */
+    color: #f4d03f;  /* texte jaune */
+    border: 2px solid #f4d03f;  /* bordure jaune */
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 0 10px #f4d03f;  /* ombre jaune */
+}
+
+/* style du titre dans la liste des utilisateurs */
+#user-list h3 {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+/* style pour le conteneur de la liste des utilisateurs */
+#user-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* style pour chaque message */
+.message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background-color: #1d1d1d;  /* fond sombre */
+    border: 1px solid #f4d03f;  /* bordure jaune */
+    border-radius: 5px;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+/* style pour l'avatar du message */
+.message img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+/* style pour les messages à l'intérieur du conteneur des messages */
+#messages div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}

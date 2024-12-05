@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>RetroChat</title>
+    <meta charset="utf-8">
+    <!-- lien vers le fichier CSS pour le style de la page -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- lien vers la police "Press Start 2P" utilisée pour l'aspect rétro -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="chat">
+        <!-- titre principal de l'application -->
+        <h1>RetroChat</h1>
+
+        <!-- affichage des messages envoyés -->
+        <div id="messages"></div>
+
+        <!-- formulaire pour entrer le pseudo et choisir un avatar -->
+        <form id="usernameForm" action="#" method="post">
+            <!-- champ pour entrer le pseudo -->
+            <input type="text" id="username" placeholder="Entrez votre pseudo" required>
+            
+            <!-- section pour choisir un avatar -->
+            <div id="avatar-selection">
+                <label for="avatar">Choisissez votre avatar:</label>
+                <div class="avatars">
+                    <!-- options d'avatars avec images -->
+                    <img src="../assets/avatar-2.png" class="avatar-option" alt="Avatar 2" data-avatar="../assets/avatar-2.png">
+                    <img src="../assets/avatar-3.png" class="avatar-option" alt="Avatar 3" data-avatar="../assets/avatar-3.png">
+                    <img src="../assets/avatar-4.png" class="avatar-option" alt="Avatar 4" data-avatar="../assets/avatar-4.png">
+                    <img src="../assets/avatar-5.png" class="avatar-option" alt="Avatar 5" data-avatar="../assets/avatar-5.png">
+                </div>
+            </div>
+            <!-- bouton pour soumettre le formulaire -->
+            <button type="submit">Se connecter</button>
+        </form>
+
+        <!-- formulaire pour envoyer un message, caché au début -->
+        <form id="formulaire" style="display:none;" action="#" method="post">
+            <!-- champ pour entrer le message -->
+            <input type="text" id="message" placeholder="Entrez votre message ici" required>
+            <!-- bouton pour envoyer le message -->
+            <button type="submit">Envoyer</button>
+        </form>
+    </div>
+
+    <!-- section pour afficher la liste des utilisateurs connectés -->
+    <div id="user-list">
+        <h3>Utilisateurs connectés</h3>
+        <div id="user-list-container"></div>
+    </div>
+
+    <!-- inclusion du fichier JavaScript qui gère la logique du chat -->
+    <script src="javascript/script.js"></script>
+</body>
+</html>
